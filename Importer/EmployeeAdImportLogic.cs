@@ -46,7 +46,20 @@ namespace EmploAdImport.Importer
 
                 ImportUsersRequestModel importUsersRequestModel = new ImportUsersRequestModel(importMode, requireRegistrationForNewEmployees);
 
+                if (bool.TryParse(ConfigurationManager.AppSettings["PartialImport"], out var partialImport) && partialImport)
+                {
+                    var importSystemId = ConfigurationManager.AppSettings["ImportSystemId"];
+                    if (!string.IsNullOrWhiteSpace(importSystemId))
+                    {
+                        importUsersRequestModel.ImportSystemId = importSystemId;
+                    }
+                }
+
                 string importFilePath = ConfigurationManager.AppSettings["ImportFromFilePath"];
+                if (!string.IsNullOrEmpty(importUsersRequestModel.ImportSystemId))
+                {
+                    importFilePath = importFilePath.Replace(".", $"{importUsersRequestModel.ImportSystemId}.");
+                }
                 if (!string.IsNullOrWhiteSpace(importFilePath))
                 {
                     if (!File.Exists(importFilePath))
